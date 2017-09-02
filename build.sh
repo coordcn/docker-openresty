@@ -34,7 +34,7 @@ cp Dockerfile.template Dockerfile
 
 sed -i "s#{{ BASE_IMAGE }}#$BASE_IMAGE#g" Dockerfile
 
-if [ "IMAGE_VERSION" ]; then
+if [ "$IMAGE_VERSION" ]; then
     sed -i "s#{{ IMAGE_VERSION }}#$IMAGE_VERSION#g" Dockerfile
     IMAGE=$IMAGE:$IMAGE_VERSION
 fi
