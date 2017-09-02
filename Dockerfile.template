@@ -3,8 +3,6 @@
 
 FROM {{ BASE_IMAGE }}
 
-ARG RESTY_RPM_VERSION="{{ IMAGE_VERSION }}.el7.centos.x86_64"
-ARG RESTY_RPM_VERSION_NOARCH="{{ IMAGE_VERSION }}.el7.centos"
 COPY OpenResty.repo /etc/yum.repos.d/OpenResty.repo
 
 RUN yum install -y \
@@ -14,9 +12,9 @@ RUN yum install -y \
         uuid-devel \
         openssl \
         openssl-devel \
-        openresty-${RESTY_RPM_VERSION} \
-        openresty-opm-${RESTY_RPM_VERSION_NOARCH} \
-        openresty-resty-${RESTY_RPM_VERSION_NOARCH} \
+        openresty \
+        openresty-opm \
+        openresty-resty \
         unzip \
     && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
     && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log \
