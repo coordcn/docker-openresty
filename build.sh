@@ -1,0 +1,42 @@
+#!/bin/sh
+
+REGISTRY="$1"
+IMAGE_VERSION="$2"
+BASE_IMAGE_VERSION="$3"
+
+IMAGE_NAME="openresty"
+BASE_IMAGE_NAME="centos-gcc"
+
+DEFAULT_IMAGE_VERSION="1.11.2.4-1"
+DEFAULT_BASE_IMAGE_VERSION="7.3.1611"
+
+if [ "$REGISTRY" ]; then
+    IMAGE=$REGISTRY/$IMAGE_NAME
+    BASE_IMAGE=$REGISTRY/$BASE_IMAGE_NAME
+else
+    IMAGE=$IMAGE_NAME
+    BASE_IMAGE=$BASE_IMAGE_NAME
+fi
+
+if [ ! "$IMAGE_VERSION" ]; then
+    IMAGE_VERSION=$DEFAULT_IMAGE_VERSION   
+fi
+
+if [ "$BASE_IMAGE_VERSION" ]; then
+    BASE_IMAGE=$BASE_IMAGE:$BASE_IMAGE_VERSION
+fi
+
+if [ ! "$BASE_IMAGE_VERSION" ] && [ "$DEFAULT_BASE_IMAGE_VERSION" ]; then
+    BASE_IMAGE=$BASE_IMAGE:$DEFAULT_BASE_IMAGE_VERSION
+fi
+
+cp Dockerfile.template Dockerfile
+
+sed -i "s#{{ BASE_IMAGE }}#$BASE_IMAGE#g" Dockerfile
+sed -i "s#{{ IMAGE_VERSION }}#$IMAGE_VERSION#g" Dockerfile
+
+IMAGE=$IMAGE:$IMAGE_VERSION
+
+docker build -t $IMAGE -f Dockerfile ./
+
+rm Dockerfile

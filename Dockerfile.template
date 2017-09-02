@@ -1,0 +1,39 @@
+# Dockerfile - CentOS 7 - RPM version
+# https://github.com/openresty/docker-openresty
+
+FROM {{ BASE_IMAGE }}
+
+ARG RESTY_RPM_VERSION="{{ IMAGE_VERSION }}.el7.centos.x86_64"
+ARG RESTY_RPM_VERSION_NOARCH="{{ IMAGE_VERSION }}.el7.centos"
+COPY OpenResty.repo /etc/yum.repos.d/OpenResty.repo
+
+RUN yum install -y \
+        cairo \
+        cairo-devel \
+        uuid \
+        uuid-devel \
+        openssl \
+        openssl-devel \
+        openresty-${RESTY_RPM_VERSION} \
+        openresty-opm-${RESTY_RPM_VERSION_NOARCH} \
+        openresty-resty-${RESTY_RPM_VERSION_NOARCH} \
+        unzip \
+    && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
+    && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log \
+    && git clone https://github.com/coordcn/lua-openssl.git \
+    && cd lua-openssl \
+    && make \
+    && make install \
+    && cd /tmp \
+    && rm -rf lua-openssl \
+    && yum clean all
+
+# Unused, present for parity with other Dockerfiles
+# This makes some tooling/testing easier, as specifying a build-arg
+# and not consuming it fails the build.
+# ARG RESTY_J="1"
+
+# Add additional binaries into PATH for convenience
+ENV PATH=$PATH:/usr/local/openresty/luajit/bin/:/usr/local/openresty/nginx/sbin/:/usr/local/openresty/bin/
+
+ENTRYPOINT ["/usr/bin/openresty", "-g", "daemon off;"]
