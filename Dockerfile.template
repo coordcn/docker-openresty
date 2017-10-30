@@ -16,14 +16,19 @@ RUN yum install -y \
         openresty-opm \
         openresty-resty \
         unzip \
-    && ln -sf /dev/stdout /usr/local/openresty/nginx/logs/access.log \
-    && ln -sf /dev/stderr /usr/local/openresty/nginx/logs/error.log \
     && git clone https://github.com/coordcn/lua-openssl.git \
     && cd lua-openssl \
     && make \
     && make install \
     && cd /tmp \
     && rm -rf lua-openssl \
+    && mkdir -p /nginx \
+    && mkdir -p /nginx/conf \
+    && mkdir -p /nginx/logs \
+    && cp /usr/local/openresty/nginx/conf/mime.types /nginx/conf/mime.types \
+    && cp /usr/local/openresty/nginx/conf/nginx.conf /nginx/conf/nginx.conf \
+    && ln -sf /dev/stdout /nginx/logs/access.log \
+    && ln -sf /dev/stderr /nginx/logs/error.log \
     && yum clean all
 
 # Unused, present for parity with other Dockerfiles
@@ -31,7 +36,9 @@ RUN yum install -y \
 # and not consuming it fails the build.
 # ARG RESTY_J="1"
 
+VOLUME ["/nginx"]
+
 # Add additional binaries into PATH for convenience
 ENV PATH=$PATH:/usr/local/openresty/luajit/bin/:/usr/local/openresty/nginx/sbin/:/usr/local/openresty/bin/
 
-ENTRYPOINT ["/usr/bin/openresty", "-g", "daemon off;"]
+ENTRYPOINT ["openresty", "-p", "/nginx", "-g", "daemon off;"]
